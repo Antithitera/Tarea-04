@@ -123,8 +123,29 @@ void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0,  d
 
 int main(){
 /** AQUÍ VA EL PROGRAMA DE MERCEDES */
-
+FILE *f;
+    if((f=fopen("resumen.txt","r"))==NULL){
+         puts("Error al abrir el fichero");}
+    fclose(f);
+    else {printf("Escribe el nombre del fichero binario de las mediciones");}/**el que contenga las series de mediciones de datosSimulacion*/
+ int serie(int nT,int nstat,int ncout, int ndelta){            /**declaro array
+            scanf(*serie, "%d,%d,%d,%d,&nT,&nstat,&ncout,&ndelta)
 for (int i=0; i<=7; i++){ /**El 7 está al azar, hay que poner el número de sets de datos */
+
+if (Gamma=0){
+
+    T=T.analisis;}
+else{
+    T=2pi/wd;}
+    
+DeltaT=factordelta*T;
+tstat=factor stat*T;                /**calculos
+tcout=factorcout*T;
+tsimul=factorsimul*T;
+
+printf("%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",id,factordelta,factorcout,,factorstat,factorsimul, alpha,beta,gamma,wd,theta0,w0,T)
+
+
     /** Aquí hay que crear los ficheros outEstado y outPoincare */
     while(tsimul<tstart || distnacia(e_t,e0)>pow(10,-5)){ //Con t de e_t siendo: tstart +nT
         /**Aquí hay que escribir en los dos ficheros, además de escribir en el fichero "resumen" */
