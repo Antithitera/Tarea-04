@@ -3,7 +3,9 @@
 # include <string.h>
 # include <iostream>
 
-using namespaces std;
+using namespace std;
+
+const double pi=(4*atan(1));
 
 struct parametros{
     double alpha, beta, gamma, omega;
@@ -78,7 +80,13 @@ int analisis (double alpha, double theta0, double w0, double epsilon,
 
     return k;
 }
-
+double aceleracion (Parametros par, Estado e, double t){//Este subalgoritmo va aquí porque hace falta para el RungeKutta
+    double term1, term2, term3;
+    term1=par.alpha*sin(e.theta);
+    term2=par.beta*e.w;
+    term3=par.gamma*cos(par.omega*t);
+    return -term1-term2+term3;
+}
 Estado Runge_Kutta (Parametros param, Estado e0, double t, double deltaT){
     Estado eAux, eF;
     double divisor[] = {6,3,3,6}, f[]={0,0.5,0.5,1};
@@ -99,21 +107,14 @@ Estado Runge_Kutta (Parametros param, Estado e0, double t, double deltaT){
     return eF;
 }
 
-//De aqui para abajo son los tres subalgoritmos, lo que hay por encima ya venía adjunto dentro del archivo de Tarea 4
 double distancia (Estado a, Estado b){
     double x, y;
     x=(a.theta-b.theta)*(a.theta-b.theta);
     y=(a.w-b.w)*(a.w-b.w);
-    return sqrt(x+y); 
+    return sqrt(x+y);
 }
 
-double aceleracion (Parametros par, Estado e, double t){
-    double term1, term2, term3;
-    term1=alpha*sin(e.theta);
-    term2=par.beta*e.w;
-    term3=par.gamma*cos(par.omega*t);
-    return -term1-term2+term3;
-}
+
 
 void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0,  double &t, Estado &e_t){
     t=t0+n*deltaT;
@@ -122,36 +123,43 @@ void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0,  d
 
 
 int main(){
-/** AQUÍ VA EL PROGRAMA DE MERCEDES */
-FILE *f;
-    if((f=fopen("resumen.txt","r"))==NULL){
-         puts("Error al abrir el fichero");}
-    fclose(f);
-    else {printf("Escribe el nombre del fichero binario de las mediciones");}/**el que contenga las series de mediciones de datosSimulacion*/
- int serie(int nT,int nstat,int ncout, int ndelta){            /**declaro array
-            scanf(*serie, "%d,%d,%d,%d,&nT,&nstat,&ncout,&ndelta)
-for (int i=0; i<=7; i++){ /**El 7 está al azar, hay que poner el número de sets de datos */
+    int nT, nstat, ncout, ndelta; //declaro variables que están dentro de DatosSimulacion
+    int id;
+    double factordelta, factorcout, factorstat, factorsimul, alpha, beta, gamma, wd, theta0, w0, T, DeltaT, tstart, tcout, tsimul;
+    FILE *resumen;
 
-if (Gamma=0){
+    if((resumen=fopen("resumen.txt","a"))==NULL)   puts("Error al abrir el fichero");
+    else {
+    printf("Escribe el nombre del fichero binario de las mediciones: ");
 
-    T=T.analisis;}
-else{
-    T=2pi/wd;}
-    
-DeltaT=factordelta*T;
-tstat=factor stat*T;                /**calculos
-tcout=factorcout*T;
-tsimul=factorsimul*T;
+    /**
+        ABRIR datosSimulacion
+        Sacar los datos de allí
+     */
 
-printf("%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",id,factordelta,factorcout,,factorstat,factorsimul, alpha,beta,gamma,wd,theta0,w0,T)
+    fscanf(/** ARRAY DE CARACTERES PARA ABRIR datosSimulacion */,"%d,%d,%d,%d",&nT, &nstat, &ncout, &ndelta);
 
+    if (Gamma==0)   analisis( /**RELLENAR */); //No hay que hacer nada más porque análisis ya modifica T
+    else{
+    T=2*pi/wd;
 
-    /** Aquí hay que crear los ficheros outEstado y outPoincare */
-    while(tsimul<tstart || distnacia(e_t,e0)>pow(10,-5)){ //Con t de e_t siendo: tstart +nT
-        /**Aquí hay que escribir en los dos ficheros, además de escribir en el fichero "resumen" */
-        
-    }
+    DeltaT=factordelta*T;
+    tstat=factorstat*T;
+    tcout=factorcout*T;
+    tsimul=factorsimul*T;
+
+    printf("%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",id,factordelta,factorcout,,factorstat,factorsimul, alpha,beta,gamma,wd,theta0,w0,T);
+
+    for (int i=0; i<=7; i++){ /**El 7 está al azar, hay que poner el número de sets de datos */
+        /** Aquí hay que crear los ficheros outEstado y outPoincare */
+        while(tsimul<tstart || distnacia(e_t,e0)>pow(10,-5)){ //Con t de e_t siendo: tstart +nT
+            /**Aquí hay que escribir en los dos ficheros, además de escribir en el fichero "resumen" */
+
+        }
 }
+}
+}
+    fclose(resumen);
     return 0;
 }
 
