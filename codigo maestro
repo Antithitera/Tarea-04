@@ -123,8 +123,8 @@ s=-term1-term2+term3;
 return s;
 }
 
-void (double t0, double deltaT, int n, Parametros param, Estado e0, &t, &e_t){
-e_t=Runge_Kutta(param, e0, t0, deltaT);
+void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0, &t, &e_t){
 t=t0+n*deltaT;
+e_t=Runge_Kutta(param, e0, t, deltaT);
 }
 
