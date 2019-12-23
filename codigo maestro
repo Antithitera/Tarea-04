@@ -1,6 +1,9 @@
 # include <stdio.h>
 # include <math.h>
 # include <string.h>
+# include <iostream>
+
+using namespaces std;
 
 struct parametros{
     double alpha, beta, gamma, omega;
@@ -22,14 +25,6 @@ struct datosSimulacion{
     Parametros param;
 };
 typedef struct datosSimulacion DatosSimulacion;
-
-int main(){
-
-
-
-    return 0;
-}
-
 
 double normaliza (double theta)
 {
@@ -103,28 +98,40 @@ Estado Runge_Kutta (Parametros param, Estado e0, double t, double deltaT){
 
     return eF;
 }
-//de aqui para abajo son los tres subalgoritmos que me tocaba realizar, en cambio lo que hay por encima ya venía adjunto dentro del archivo de Tarea 4
 
+//De aqui para abajo son los tres subalgoritmos, lo que hay por encima ya venía adjunto dentro del archivo de Tarea 4
 double distancia (Estado a, Estado b){
-double disEucl;
-x=(theta.a-theta.b)*(theta.a-theta.b);
-y=(w.a-w.b)*(w.a-w.b);
-disEucl=sqrt(x+y);
-return disEucl;
+    double x, y;
+    x=(a.theta-b.theta)*(a.theta-b.theta);
+    y=(a.w-b.w)*(a.w-b.w);
+    return sqrt(x+y); 
 }
 
 double aceleracion (Parametros par, Estado e, double t){
-double s;
-double term1, term2, term3;
-term1=alpha*sin(e.theta);
-term2=par.beta*e.w;
-term3=par.gamma*cos(par.omega*t);
-s=-term1-term2+term3;
-return s;
+    double term1, term2, term3;
+    term1=alpha*sin(e.theta);
+    term2=par.beta*e.w;
+    term3=par.gamma*cos(par.omega*t);
+    return -term1-term2+term3;
 }
 
-void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0, &t, &e_t){
-t=t0+n*deltaT;
-e_t=Runge_Kutta(param, e0, t, deltaT);
+void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0,  double &t, Estado &e_t){
+    t=t0+n*deltaT;
+    e_t=Runge_Kutta(param, e0, t, deltaT);
 }
+
+
+int main(){
+/** AQUÍ VA EL PROGRAMA DE MERCEDES */
+
+for (int i=0; i<=7; i++){ /**El 7 está al azar, hay que poner el número de sets de datos */
+    /** Aquí hay que crear los ficheros outEstado y outPoincare */
+    while(tsimul<tstart || distnacia(e_t,e0)>pow(10,-5)){ //Con t de e_t siendo: tstart +nT
+        /**Aquí hay que escribir en los dos ficheros, además de escribir en el fichero "resumen" */
+        
+    }
+}
+    return 0;
+}
+
 
