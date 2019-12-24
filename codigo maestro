@@ -150,7 +150,9 @@ char serieEjemplares [100]
     tsimul=factorsimul*T;
 
     printf("%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",id,factordelta,factorcout,,factorstat,factorsimul, alpha,beta,gamma,wd,theta0,w0,T);
-
+FILE*outEstado;
+FILE*outpointcarre;
+sprintf(/**nombre del array","outEstados_%2d.txt",3)  **/El array sera serieEjemplares creado arriba*/
  
         /** Aquí hay que crear los ficheros outEstado y outPoincare */
         while(tsimul<tstart || distnacia(e_t,e0)>pow(10,-5)){ //Con t de e_t siendo: tstart +nT
