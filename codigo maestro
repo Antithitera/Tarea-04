@@ -7,6 +7,7 @@ using namespace std;
 
 const double pi=(4*atan(1));
 
+
 struct parametros{
     double alpha, beta, gamma, omega;
 };
@@ -123,47 +124,45 @@ void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0,  d
 
 
 int main(){
-    int nT, nstat, ncout, ndelta; //declaro variables que están dentro de DatosSimulacion
-    int id;
-    double factordelta, factorcout, factorstat, factorsimul, alpha, beta, gamma, wd, theta0, w0, T, DeltaT, tstart, tcout, tsimul;
-    FILE *resumen;
+    double thetaM, T;
+    char nombreFichero[100], estados[100], poincare[100];
+    FILE *resumen, *datosTarea;
 
     if((resumen=fopen("resumen.txt","a"))==NULL)   puts("Error al abrir el fichero");
-    else {
+    else
     printf("Escribe el nombre del fichero binario de las mediciones: ");
+    scanf("%s",nombreFichero);
+    if((datosTarea=fopen(nombreFichero,"rb"))==NULL)   puts("Error al abrir el fichero");//Abrimos datosTarea04.dat para leer
+    else
 
-    DatosSimulacion ( double factorDeltaT, factorTCout, factorTStat, factorTSimul); /**ABRIR datosSimulacion
-                                                                                        Sacar los datos de allí     */
-char serieEjemplares [100]
-    fscanf(/** ARRAY DE CARACTERES PARA ABRIR datosSimulacion */,"%d,%d,%d,%d",&nT,serieEjemplares, &nstat, &ncout, &ndelta);
-  for (int id=0; i<=7; id++){ /**El 7 está al azar, hay que poner el número de sets de datos */
-  id=serieEjemplares[id]}
-  
-    if (Gamma==0)   analisis( double alpha, double theta0, double w0, double epsilon,
-               double &thetaM, double &T/**RELLENAR */); //No hay que hacer nada más porque análisis ya modifica T
-    else{
-    T=2*pi/wd;  /**cOMPROBAR, CREO  que los algoritmos dados la llaman solo w,no wd*/
+    for (int id=0; id<=6; id++){  //Empezamos bucle de sets de datos
+        sprintf(estados, "outEstados_%02d.txt",id);
+        sprintf(poincare, "outPoincare_%02d.txt",id); //llamamos "estados" y "poincare" a los ficheros con los que hemos de trabajar
+        DatosSimulacion dat;
+        fread(&dat, sizeof(DatosSimulacion),1,datosTarea); //Leemos un set de datos de datosTarea y lo guardamos como dat
 
-    DeltaT=factordelta*T;
-    tstat=factorstat*T;
-    tcout=factorcout*T;
-    tsimul=factorsimul*T;
+        int nT=dat.factorTSimul-dat.factorTStat, nstart=dat.factorTStat/dat.factorTSimul, ncout=1/dat.factorTCout, nD=dat.factorTCout/dat.factorDeltaT;
+        if (dat.param.gamma==0)
+            analisis(dat.param.alpha, dat.estadoInicial.theta, dat.estadoInicial.w, pow(10,-7), &thetaM, &T);/** AQUÍ DA ERROR AL COMPILAR, POR EL &thetaM AL PARECER */
+        else
+        T=2*pi/dat.param.omega; //wD es el parametro y w0 es el estado inicial
 
-    printf("%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",id,factordelta,factorcout,,factorstat,factorsimul, alpha,beta,gamma,wd,theta0,w0,T);
-FILE*outEstado;
-FILE*outpointcarre;
-sprintf(/**nombre del array","outEstados_%2d.txt",3)  **/El array sera serieEjemplares creado arriba*/
- 
-        /** Aquí hay que crear los ficheros outEstado y outPoincare */
-        while(tsimul<tstart || distnacia(e_t,e0)>pow(10,-5)){ //Con t de e_t siendo: tstart +nT
-            /**Aquí hay que escribir en los dos ficheros, además de escribir en el fichero "resumen" */
+        double DeltaT=dat.factorDeltaT*T;
+        double tstat=dat.factorTStat*T;
+        double tcout=dat.factorTCout*T;
+        double tsimul=dat.factorTSimul*T;
+        printf("Simulacion %d:\n Factores temporales: (%lf,%lf,%lf,%lf)\n Parametros: (%lf,%lf,%lf,%lf)\n Estado inicial: (%lf,%lf)\n T=%lf",
+               id,dat.factorDeltaT,dat.factorTCout,dat.factorTStat,dat.factorTSimul, dat.param.alpha,dat.param.beta,dat.param.gamma,dat.param.omega,dat.estadoInicial.theta,dat.estadoInicial.w,T);
 
-        }
-}
-}
-}
+        FILE *outestados=fopen(estados,"a");
+        FILE *outpoincare=fopen(poincare,"a");//Creamos los ficheros outEstados y outPoincare con su numero correspondiente
+
+        /** AQUÍ CONTINUA EL PROGRAMA */
+        
+        
+    fclose(outestados); fclose(outpoincare);
+    }
     fclose(resumen);
     return 0;
 }
-
 
