@@ -37,8 +37,7 @@ double normaliza (double theta)
     return theta;
 }
 
-int analisis (double alpha, double theta0, double w0, double epsilon,
-               double &thetaM, double &T)
+int analisis (double alpha, double theta0, double w0, double epsilon, double &thetaM, double &T)
 {
     int k;
     double E = w0*w0/2/alpha - cos(theta0);
@@ -124,7 +123,9 @@ void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0,  d
 
 
 int main(){
+
     double thetaM, T;
+    int vueltas=0;
     char nombreFichero[100], estados[100], poincare[100];
     FILE *resumen, *datosTarea;
 
@@ -141,26 +142,41 @@ int main(){
         DatosSimulacion dat;
         fread(&dat, sizeof(DatosSimulacion),1,datosTarea); //Leemos un set de datos de datosTarea y lo guardamos como dat
 
-        int nT=dat.factorTSimul-dat.factorTStat, nstart=dat.factorTStat/dat.factorTSimul, ncout=1/dat.factorTCout, nD=dat.factorTCout/dat.factorDeltaT;
+        //int nT=dat.factorTSimul-dat.factorTStat, nstart=dat.factorTStat/dat.factorTSimul, ncout=1/dat.factorTCout, nD=dat.factorTCout/dat.factorDeltaT;
         if (dat.param.gamma==0)
-            analisis(dat.param.alpha, dat.estadoInicial.theta, dat.estadoInicial.w, pow(10,-7), &thetaM, &T);/** AQUÍ DA ERROR AL COMPILAR, POR EL &thetaM AL PARECER */
+            analisis(dat.param.alpha, dat.estadoInicial.theta, dat.estadoInicial.w, pow(10,-7), thetaM, T);/** AQUÍ DA ERROR AL COMPILAR, POR EL &thetaM AL PARECER */
         else
         T=2*pi/dat.param.omega; //wD es el parametro y w0 es el estado inicial
 
         double DeltaT=dat.factorDeltaT*T;
-        double tstat=dat.factorTStat*T;
+        double tstart=dat.factorTStat*T;
         double tcout=dat.factorTCout*T;
         double tsimul=dat.factorTSimul*T;
-        printf("Simulacion %d:\n Factores temporales: (%lf,%lf,%lf,%lf)\n Parametros: (%lf,%lf,%lf,%lf)\n Estado inicial: (%lf,%lf)\n T=%lf",
+        printf("\nSimulacion %02d:\n Factores temporales: (%lf,%lf,%lf,%lf)\n Parametros: (%lf,%lf,%lf,%lf)\n Estado inicial: (%lf,%lf)\n T=%lf\n",
                id,dat.factorDeltaT,dat.factorTCout,dat.factorTStat,dat.factorTSimul, dat.param.alpha,dat.param.beta,dat.param.gamma,dat.param.omega,dat.estadoInicial.theta,dat.estadoInicial.w,T);
 
         FILE *outestados=fopen(estados,"a");
         FILE *outpoincare=fopen(poincare,"a");//Creamos los ficheros outEstados y outPoincare con su numero correspondiente
+        Estado estart=dat.estadoInicial, ef;
+        double t=tstart;
+        estart=Runge_Kutta(dat.param,dat.estadoInicial, tstart, DeltaT); //Calculamos el estado del péndulo en tstart
+        ef=dat.estadoInicial;//Hacemos esto sólo para pueda entrar en el while
+        while (t<tsimul && distancia(ef,estart)>=pow(10,-5)){
+            for (double i=0; i<=T; i=i){
+                    for (double n=0; n<=tcout; n=n+DeltaT){//Bucle que tarda tcout segundos
+                    ef=Runge_Kutta(dat.param, dat.estadoInicial, t, DeltaT);
+                    t=t+DeltaT;
+                    i=i+DeltaT;
+                    }
+                fprintf(outestados,"%g %g %g\n", t, normaliza(ef.theta), ef.w);
 
-        /** AQUÍ CONTINUA EL PROGRAMA */
-        
-        
-    fclose(outestados); fclose(outpoincare);
+            }
+            fprintf(outpoincare,"%g %g %g\n", t, normaliza(ef.theta), ef.w);
+            vueltas++;
+        }
+        fprintf(resumen,"%d %g %g %g %g %g %g %i %g\n", id, dat.param.alpha, dat.param.beta, dat.param.gamma, dat.param.omega, dat.estadoInicial.theta, dat.estadoInicial.w, vueltas, distancia(ef,estart));
+        fclose(outestados); fclose(outpoincare);
+        vueltas=0;
     }
     fclose(resumen);
     return 0;
