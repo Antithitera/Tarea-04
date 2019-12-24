@@ -132,16 +132,17 @@ int main(){
     else {
     printf("Escribe el nombre del fichero binario de las mediciones: ");
 
-    /**
-        ABRIR datosSimulacion
-        Sacar los datos de allí
-     */
-
-    fscanf(/** ARRAY DE CARACTERES PARA ABRIR datosSimulacion */,"%d,%d,%d,%d",&nT, &nstat, &ncout, &ndelta);
-
-    if (Gamma==0)   analisis( /**RELLENAR */); //No hay que hacer nada más porque análisis ya modifica T
+    DatosSimulacion ( double factorDeltaT, factorTCout, factorTStat, factorTSimul); /**ABRIR datosSimulacion
+                                                                                        Sacar los datos de allí     */
+char serieEjemplares [100]
+    fscanf(/** ARRAY DE CARACTERES PARA ABRIR datosSimulacion */,"%d,%d,%d,%d",&nT,serieEjemplares, &nstat, &ncout, &ndelta);
+  for (int id=0; i<=7; id++){ /**El 7 está al azar, hay que poner el número de sets de datos */
+  id=serieEjemplares[id]}
+  
+    if (Gamma==0)   analisis( double alpha, double theta0, double w0, double epsilon,
+               double &thetaM, double &T/**RELLENAR */); //No hay que hacer nada más porque análisis ya modifica T
     else{
-    T=2*pi/wd;
+    T=2*pi/wd;  /**cOMPROBAR, CREO  que los algoritmos dados la llaman solo w,no wd*/
 
     DeltaT=factordelta*T;
     tstat=factorstat*T;
@@ -150,7 +151,7 @@ int main(){
 
     printf("%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",id,factordelta,factorcout,,factorstat,factorsimul, alpha,beta,gamma,wd,theta0,w0,T);
 
-    for (int i=0; i<=7; i++){ /**El 7 está al azar, hay que poner el número de sets de datos */
+ 
         /** Aquí hay que crear los ficheros outEstado y outPoincare */
         while(tsimul<tstart || distnacia(e_t,e0)>pow(10,-5)){ //Con t de e_t siendo: tstart +nT
             /**Aquí hay que escribir en los dos ficheros, además de escribir en el fichero "resumen" */
