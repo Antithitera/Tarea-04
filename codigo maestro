@@ -1,0 +1,183 @@
+# include <stdio.h>
+# include <math.h>
+# include <string.h>
+# include <iostream>
+
+using namespace std;
+
+const double pi=(4*atan(1));
+
+
+struct parametros{
+    double alpha, beta, gamma, omega;
+};
+typedef struct parametros Parametros;
+/** Parámetros del péndulo*/
+
+struct estado {
+    double theta, w;
+};
+typedef struct estado Estado;
+/** El estado del péndulo queda definido
+    por los valores del ángulo y la velocidad angular.
+    Suponemos que vienen expresados,respectivamente, en radianes y radianes/segundo  */
+
+struct datosSimulacion{
+    double factorDeltaT, factorTCout, factorTStat, factorTSimul;
+    Estado estadoInicial;
+    Parametros param;
+};
+typedef struct datosSimulacion DatosSimulacion;
+
+double normaliza (double theta)
+{
+    double n =  floor ( (theta+M_PI)/2/M_PI);
+    theta -= 2*n*M_PI;
+
+    return theta;
+}
+
+int analisis (double alpha, double theta0, double w0, double epsilon, double &thetaM, double &T)
+{
+    int k;
+    double E = w0*w0/2/alpha - cos(theta0);
+
+    if (E == 1) {
+        double D = tan (normaliza(theta0)/4 + M_PI/4);
+
+        if (D == 0) T = 10/sqrt(alpha); // Damos un valor arbitrario,
+                                        //  para evitar dividir por 0 en la siguiente expresión
+        else
+            T = 1/sqrt(alpha) * log ( tan (0.999*M_PI/4 + M_PI/4) / D);
+
+        if (D == 0 ||w0 < 0) thetaM = - M_PI;
+        else thetaM = M_PI;
+        k = 0;
+    }
+    else {
+            double T0, r;
+            if (E < 1) {
+                thetaM = acos (-E);
+                T0 = 2*M_PI /sqrt(alpha);
+                r = sin (thetaM/2);
+                k = -1;
+            }
+            else{
+                double A = sqrt( alpha*(1+E)/2 );
+                T0 = M_PI/A;
+                r = sqrt(alpha)/A;
+                thetaM = M_PI;
+                k = 1;
+            }
+            long long N = (long long) ceil (log (epsilon*(1-r*r))/2/log(r));
+            double suma = 1, termino=1;
+            for (long long n=1; n<= N ; n++){
+                termino = termino * pow ( (2*n-1)/2./n *r , 2);
+                suma += termino;
+            }
+            T = T0 * suma;
+    }
+
+    return k;
+}
+double aceleracion (Parametros par, Estado e, double t){//Este subalgoritmo va aquí porque hace falta para el RungeKutta
+    double term1, term2, term3;
+    term1=par.alpha*sin(e.theta);
+    term2=par.beta*e.w;
+    term3=par.gamma*cos(par.omega*t);
+    return -term1-term2+term3;
+}
+Estado Runge_Kutta (Parametros param, Estado e0, double t, double deltaT){
+    Estado eAux, eF;
+    double divisor[] = {6,3,3,6}, f[]={0,0.5,0.5,1};
+    double dTheta, dw;
+
+    eF =  e0;
+    for (int i=0; i< 4; i++) {
+        eAux.theta = e0.theta + dTheta * f[i];
+        eAux.w = e0.w + dw * f[i];
+
+        dTheta = eAux.w * deltaT;
+        dw = aceleracion (param, eAux, t + f[i] *deltaT) * deltaT;
+
+        eF.theta += dTheta / divisor[i];
+        eF.w += dw / divisor[i];
+    }
+
+    return eF;
+}
+
+double distancia (Estado a, Estado b){
+    double x, y;
+    x=(a.theta-b.theta)*(a.theta-b.theta);
+    y=(a.w-b.w)*(a.w-b.w);
+    return sqrt(x+y);
+}
+
+
+
+void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0,  double &t, Estado &e_t){
+    t=t0+n*deltaT;
+    e_t=Runge_Kutta(param, e0, t, deltaT);
+}
+
+
+int main(){
+
+    double thetaM, T;
+    int vueltas=0;
+    char nombreFichero[100], estados[100], poincare[100];
+    FILE *resumen, *datosTarea;
+
+    if((resumen=fopen("resumen.txt","a"))==NULL)   puts("Error al abrir el fichero");
+    else
+    printf("Escribe el nombre del fichero binario de las mediciones: ");
+    scanf("%s",nombreFichero);
+    if((datosTarea=fopen(nombreFichero,"rb"))==NULL)   puts("Error al abrir el fichero");//Abrimos datosTarea04.dat para leer
+    else
+
+    for (int id=0; id<=6; id++){  //Empezamos bucle de sets de datos
+        sprintf(estados, "outEstados_%02d.txt",id);
+        sprintf(poincare, "outPoincare_%02d.txt",id); //llamamos "estados" y "poincare" a los ficheros con los que hemos de trabajar
+        DatosSimulacion dat;
+        fread(&dat, sizeof(DatosSimulacion),1,datosTarea); //Leemos un set de datos de datosTarea y lo guardamos como dat
+
+        //int nT=dat.factorTSimul-dat.factorTStat, nstart=dat.factorTStat/dat.factorTSimul, ncout=1/dat.factorTCout, nD=dat.factorTCout/dat.factorDeltaT;
+        if (dat.param.gamma==0)
+            analisis(dat.param.alpha, dat.estadoInicial.theta, dat.estadoInicial.w, pow(10,-7), thetaM, T);/** AQUÍ DA ERROR AL COMPILAR, POR EL &thetaM AL PARECER */
+        else
+        T=2*pi/dat.param.omega; //wD es el parametro y w0 es el estado inicial
+
+        double DeltaT=dat.factorDeltaT*T;
+        double tstart=dat.factorTStat*T;
+        double tcout=dat.factorTCout*T;
+        double tsimul=dat.factorTSimul*T;
+        printf("\nSimulacion %02d:\n Factores temporales: (%lf,%lf,%lf,%lf)\n Parametros: (%lf,%lf,%lf,%lf)\n Estado inicial: (%lf,%lf)\n T=%lf\n",
+               id,dat.factorDeltaT,dat.factorTCout,dat.factorTStat,dat.factorTSimul, dat.param.alpha,dat.param.beta,dat.param.gamma,dat.param.omega,dat.estadoInicial.theta,dat.estadoInicial.w,T);
+
+        FILE *outestados=fopen(estados,"a");
+        FILE *outpoincare=fopen(poincare,"a");//Creamos los ficheros outEstados y outPoincare con su numero correspondiente
+        Estado estart=dat.estadoInicial, ef;
+        double t=tstart;
+        estart=Runge_Kutta(dat.param,dat.estadoInicial, tstart, DeltaT); //Calculamos el estado del péndulo en tstart
+        ef=dat.estadoInicial;//Hacemos esto sólo para pueda entrar en el while
+        while (t<tsimul && distancia(ef,estart)>=pow(10,-5)){
+            for (double i=0; i<=T; i=i){
+                    for (double n=0; n<=tcout; n=n+DeltaT){//Bucle que tarda tcout segundos
+                    ef=Runge_Kutta(dat.param, dat.estadoInicial, t, DeltaT);
+                    t=t+DeltaT;
+                    i=i+DeltaT;
+                    }
+                fprintf(outestados,"%g %g %g\n", t, normaliza(ef.theta), ef.w);
+
+            }
+            fprintf(outpoincare,"%g %g %g\n", t, normaliza(ef.theta), ef.w);
+            vueltas++;
+        }
+        fprintf(resumen,"%d %g %g %g %g %g %g %i %g\n", id, dat.param.alpha, dat.param.beta, dat.param.gamma, dat.param.omega, dat.estadoInicial.theta, dat.estadoInicial.w, vueltas, distancia(ef,estart));
+        fclose(outestados); fclose(outpoincare);
+        vueltas=0;
+    }
+    fclose(resumen);
+    return 0;
+}
