@@ -109,16 +109,22 @@ Estado Runge_Kutta (Parametros param, Estado e0, double t, double deltaT){
 
 double distancia (Estado a, Estado b){
     double x, y;
-    x=(a.theta-b.theta)*(a.theta-b.theta);
+    x= normaliza(a.theta-b.theta)*normaliza(a.theta-b.theta);
     y=(a.w-b.w)*(a.w-b.w);
-    return sqrt(normaliza(x)+y);
+    return sqrt(x+y);
 }
 
 
-void evolucion (double t0, double deltaT, int n, Parametros param, Estado e0,  double &t, Estado &e_t){
-    e_t=Runge_Kutta(param, e0, t, deltaT);
-    t=t0+n*deltaT;
-
+void evolucion (double t0, double deltaT, int n, Parametros param,  double &t, Estado &e_t){
+    
+    t=t0;
+    for(int i=0; i<n; i++){
+        e_t=Runge_Kutta(param, e_t, t, deltaT);
+        t = t+deltaT;
+    }
+        
+    
+    
 }
 
 
@@ -158,19 +164,21 @@ int main(){
 
         FILE *outestados=fopen(estados,"a");
         FILE *outpoincare=fopen(poincare,"a");//Creamos los ficheros outEstados y outPoincare con su numero correspondiente
-        Estado estart=dat.estadoInicial, e_t;
-        for (int i=0; i<=nstart; i++){//Calculamos el estado del péndulo en tstart
-            evolucion(t, DeltaT, nD, dat.param,dat.estadoInicial, t, estart);
+        Estado estart, e_t;
+        evolucion(t, DeltaT, nstart, dat.param, t, e_t);
+        estart=e_t;
         }
-        while (t<tsimul && distancia(e_t,estart)>=pow(10,-5)){
-                cout<<"gallo";
-            for (int i=0; i<=ncout; i++){
-                evolucion(t,DeltaT,nD,dat.param,dat.estadoInicial,t,e_t);
+        int j;
+        do{
+            for (int i=0; i<ncout; i++){
+                evolucion(t,DeltaT,nD,dat.param,t,e_t);
                 fprintf(outestados,"%g %g %g\n", t, normaliza(e_t.theta), e_t.w);
+                j++;
             }
             fprintf(outpoincare,"%g %g %g\n", t, normaliza(e_t.theta), e_t.w);
             vueltas++;
-        }
+        }while (j<nT && distancia(e_t,estart)>=pow(10,-5));
+        
         fprintf(resumen,"%d %g %g %g %g %g %g %i %g\n", id, dat.param.alpha, dat.param.beta, dat.param.gamma, dat.param.omega, dat.estadoInicial.theta, dat.estadoInicial.w, vueltas, distancia(e_t,estart));
         fclose(outestados); fclose(outpoincare);
         vueltas=0;
@@ -178,5 +186,4 @@ int main(){
     fclose(resumen);
     return 0;
 }
-
 
