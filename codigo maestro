@@ -111,7 +111,7 @@ double distancia (Estado a, Estado b){
     double x, y;
     x=(a.theta-b.theta)*(a.theta-b.theta);
     y=(a.w-b.w)*(a.w-b.w);
-    return sqrt(x+y);
+    return sqrt(normaliza(x)+y);
 }
 
 
